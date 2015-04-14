@@ -16,6 +16,7 @@
 
 #include "auth.h"
 #include "playlist.h"
+#include "filesytem.h"
 
 class NetClient : public QObject
 {
@@ -23,12 +24,14 @@ class NetClient : public QObject
 public:
     explicit NetClient(QObject *parent = 0);
     ~NetClient();
+    bool downloadMediaFile(const QString filename, const QString playerId);
 
+    bool downloadFiles(const QList<QString> filesToDownload, const QString playerId);
 signals:
 
 public slots:
     QString authenticate(const QString pairingCode);
-    Playlist *donwloadPlaylist(const QString playerId);
+    Playlist *downloadPlaylist(const QString playerId);
 private:
 };
 

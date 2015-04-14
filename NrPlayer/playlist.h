@@ -9,25 +9,33 @@
 #include <QDebug>
 #include <QJsonObject>
 #include <QStandardPaths>
+#include <QList>
 
 class Playlist : public QObject
 {
     Q_OBJECT
 public:
     explicit Playlist(QObject *parent = 0);
-    Playlist(const QByteArray jsonData, QObject *parent = 0);
-    bool playlistIsValid(){ return isValid;}
+    Playlist(const QByteArray &jsonData, QObject *parent = 0);
+    bool playlistIsValid() {
+        return isValid;
+    }
     ~Playlist();
 
-    QByteArray getPlaylistId() const{ return playlistId; }
-    uint getVersion() const {return version;}
+    QByteArray getPlaylistId() const {
+        return playlistId;
+    }
+    uint getVersion() const {
+        return version;
+    }
     QByteArray toJson() const;
+    QList<QString> listMediaFiles();
 
 signals:
 
 public slots:
 private:
-    QJsonDocument playlistDocument;
+    QJsonDocument playlistFull;
     QJsonDocument playlistInfo;
     QByteArray playlistId;
     uint version;
