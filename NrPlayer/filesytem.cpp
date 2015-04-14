@@ -6,7 +6,7 @@ bool savePlaylist(QSharedPointer<Playlist> playlist)
     QByteArray playlistJson = playlist.data()->toJson();
     QString dataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
-    QFile playlit_file(dataPath+"/"+"playlist.json");
+    QFile playlit_file(dataPath+"/"+playlist.data()->getPlaylistId()+".json");
     if (!playlit_file.open(QIODevice::WriteOnly)){
         qDebug() << "File Write error";
         return false;
