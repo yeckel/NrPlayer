@@ -52,7 +52,8 @@ void PlayerController::requestPlaylist() {
     if (playlist.data()->playlistIsValid()) {
         settings.setValue("Main/playlistId",QString(playlist.data()->getPlaylistId()));
         savePlaylist(playlist);
-        controllerState = PLAY;
+        if (makeMediaFilesReady())
+            controllerState = PLAY;
     }
 }
 

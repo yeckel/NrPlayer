@@ -19,9 +19,11 @@ Playlist::Playlist(const QByteArray &jsonData, QObject *parent): QObject(parent)
     playlistFull = QJsonDocument::fromJson(jsonData);
     QJsonObject json = playlistFull.object();
 
-    QByteArray playlistInfoStr = json["playlistInfo"].toString().toLatin1();
-    playlistInfo = QJsonDocument::fromJson(playlistInfoStr);
-
+    QByteArray playlistInfoStr = json["playlistInfo"].toString().toUtf8();
+    QJsonParseError error;
+    playlistInfo = QJsonDocument::fromJson(playlistInfoStr,&error);
+    //qDebug() << error.errorString();
+    //qDebug() << playlistInfo.toJson();
     if (playlistInfo.object().contains("id")) {
         playlistId = playlistInfo.object()["id"].toString().toLatin1();
         if (playlistId != "") {
