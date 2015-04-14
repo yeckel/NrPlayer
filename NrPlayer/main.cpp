@@ -1,9 +1,14 @@
-#include <QCoreApplication>
+#include <QGuiApplication>
 #include "playercontroller.h"
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QGuiApplication a(argc, argv);
+
+    QCoreApplication::setOrganizationName("LTSoft");
+    QCoreApplication::setOrganizationDomain("tomsik.eu");
+    QCoreApplication::setApplicationName("NuvelarRbPiPlayer");
+
     PlayerController controller;
     return a.exec();
 }

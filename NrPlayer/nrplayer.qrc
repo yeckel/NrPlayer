@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>authentication.qml</file>
+    </qresource>
+</RCC>

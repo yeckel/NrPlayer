@@ -4,9 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core
-
-QT       -= gui
+QT       += core qml quick network
 
 TARGET = NrPlayer
 CONFIG   += console
@@ -19,10 +17,19 @@ SOURCES += main.cpp \
     playercontroller.cpp \
     netclient.cpp \
     playlist.cpp \
-    visualplayer.cpp
+    visualplayer.cpp \
+    auth.cpp
 
 HEADERS += \
     playercontroller.h \
     netclient.h \
     playlist.h \
-    visualplayer.h
+    visualplayer.h \
+    auth.h
+
+RESOURCES += \
+    nrplayer.qrc
+
+DISTFILES +=
+
+CONFIG += c++11

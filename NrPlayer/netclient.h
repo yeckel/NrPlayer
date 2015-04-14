@@ -2,6 +2,19 @@
 #define NETCLIENT_H
 
 #include <QObject>
+#include <QDebug>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QDebug>
+#include <QJsonObject>
+
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QEventLoop>
+
+#include "auth.h"
 
 class NetClient : public QObject
 {
@@ -13,6 +26,8 @@ public:
 signals:
 
 public slots:
+    QString authenticate(const QString pairingCode);
+private:
 };
 
 #endif // NETCLIENT_H
