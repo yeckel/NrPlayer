@@ -51,3 +51,9 @@ QString encondeId(const QString id){
         QByteArray hashedId = QCryptographicHash::hash(id.toLatin1(), QCryptographicHash::Sha256);
         return hashedId.toHex();
 }
+
+uint createRandomPlayerId(){
+    const int LOW = 11111;
+    const int HIGH = 99999;
+    return (qrand() % ((HIGH + 1) - LOW) + LOW);
+}

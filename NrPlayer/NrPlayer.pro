@@ -18,14 +18,16 @@ SOURCES += main.cpp \
     netclient.cpp \
     playlist.cpp \
     visualplayer.cpp \
-    auth.cpp
+    auth.cpp \
+    filesytem.cpp
 
 HEADERS += \
     playercontroller.h \
     netclient.h \
     playlist.h \
     visualplayer.h \
-    auth.h
+    auth.h \
+    filesytem.h
 
 RESOURCES += \
     nrplayer.qrc

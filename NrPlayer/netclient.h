@@ -15,6 +15,7 @@
 #include <QEventLoop>
 
 #include "auth.h"
+#include "playlist.h"
 
 class NetClient : public QObject
 {
@@ -27,6 +28,7 @@ signals:
 
 public slots:
     QString authenticate(const QString pairingCode);
+    Playlist *donwloadPlaylist(const QString playerId);
 private:
 };
 

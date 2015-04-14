@@ -6,13 +6,14 @@
 #include "visualplayer.h"
 #include "playlist.h"
 #include "netclient.h"
+#include "filesytem.h"
 
 class PlayerController : public QObject
 {
     Q_OBJECT
-    enum ControllerStatus {PLAY, NOT_AUTHENTICATED, SWITCH, AUTH};
+    enum ControllerStatus {NOT_AUTHENTICATED, WITHOUT_PLAYLIST, NEW_PLAYLIST};
 public:
-    explicit PlayerController(QObject *parent = 0);
+    explicit PlayerController(QObject *parent = 0);    
     ~PlayerController();
 
 signals:
@@ -23,9 +24,15 @@ private:
     QTimer updateTimer;
     QSettings settings;
     NetClient netClient;
-    ControllerStatus cStatus;
+    ControllerStatus controllerState;
     VisualPlayer player;
+    //Playlist *playlist;
+    QSharedPointer<Playlist> playlist;
 
+    void authenticate();
+
+
+    void requestPlaylist();
 };
 
 #endif // PLAYERCONTROLLER_H
