@@ -118,6 +118,7 @@ bool NetClient::downloadMediaFile(const QString filename, const QString playerId
 }
 
 bool NetClient::downloadFiles(const QList<QString> filesToDownload,const QString playerId) {
+    qDebug() << Q_FUNC_INFO;
     foreach (QString fileName, filesToDownload) {
         if (!downloadMediaFile(fileName,playerId)) {
             qDebug() << "Failed downloading:" << fileName;

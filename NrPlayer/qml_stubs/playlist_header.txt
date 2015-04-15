@@ -1,0 +1,18 @@
+import QtQuick 2.4
+import QtMultimedia 5.0
+import QtWebKit 3.0
+
+Rectangle {
+    id: nrPlayer
+    color: "black"
+    anchors.fill: parent
+
+    transitions: Transition {
+        enabled: true
+        NumberAnimation {
+            properties: "opacity"
+            easing.type: Easing.InOutQuad
+            duration: 1000
+        }
+    }
+

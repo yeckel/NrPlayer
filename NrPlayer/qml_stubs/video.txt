@@ -1,0 +1,23 @@
+        VideoOutput {
+        id: id%videoId%
+        opacity: 0
+        anchors.fill: parent
+        source: mediaPlayer
+        MediaPlayer {
+                id: mediaPlayer
+                autoLoad: true
+                loops: Audio.Infinite
+                source: "%videoFile%"
+                onError: {
+                    if (MediaPlayer.NoError != error) {
+                        console.log("[qmlvideo] VideoItem.onError error " + error + " errorString " + errorString)
+                        video1.fatalError()
+                    }
+                }
+            }
+                function start() {
+                    mediaPlayer.seek(0);
+                    mediaPlayer.play();
+                }
+                function stop() { mediaPlayer.stop() }
+        }

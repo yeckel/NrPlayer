@@ -1,4 +1,6 @@
 #include "playlist.h"
+#include "filesytem.h"
+#include <QCryptographicHash>
 
 Playlist::Playlist(QObject *parent)
 {
@@ -15,6 +17,7 @@ Playlist::Playlist(QObject *parent)
 Playlist::Playlist(const QByteArray &jsonData, QObject *parent): QObject(parent)
 {
 //    qDebug() << Q_FUNC_INFO;
+    known_media = {"Image","Video","WWW"};
     isValid = false;
     playlistFull = QJsonDocument::fromJson(jsonData);
     QJsonObject json = playlistFull.object();
@@ -54,19 +57,178 @@ QByteArray Playlist::toJson() const
 
 QList<QString> Playlist::listMediaFiles()
 {
+
+    QList<QString> mediaTypes = {"Image","Video"};
+    return listMedia(mediaTypes);
+}
+
+QByteArray Playlist::toQML()
+{
+    QByteArray finalQml;
+    addQmlHeader(finalQml);
+    addQmlImages(finalQml);
+    addQmlWebs(finalQml);
+    addQmlVideos(finalQml);
+    addQmlStates(finalQml);
+    addQmlTimer(finalQml);
+    finalQml.append("\n}");
+    return finalQml;
+}
+
+QByteArray Playlist::addQmlHeader(QByteArray &qml)
+{
+    QString header = loadTemplate(":/qml_stubs/playlist_header.txt");
+    //header.replace(QString("%playlistId%"),QString(this->playlistId));
+    qml = qml + header.toUtf8();
+    return qml;
+}
+
+QByteArray Playlist::addQmlImages(QByteArray &qml)
+{
+    QString imageTemplate = loadTemplate(":/qml_stubs/image.txt");
+
+    QList<QString> images = listMedia(QList<QString>({QString("Image")}));
+    foreach (QString imageId, images) {
+        QString it(imageTemplate);
+        it.replace(QString("%imageId%"),imageId);
+        it.replace(QString("%fileName%"),getDataPath()+imageId);
+        qml = qml + it.toUtf8();
+    }
+    return qml;
+}
+
+QByteArray Playlist::addQmlWebs(QByteArray &qml)
+{
+    QString webTemplate = loadTemplate(":/qml_stubs/webview.txt");
+    QList<QString> webs = listMedia(QList<QString>({QString("WWW")}),"url");
+    foreach (QString webUrl, webs) {
+        QString it(webTemplate);
+        QString webId = QCryptographicHash::hash((webUrl.toUtf8()),QCryptographicHash::Md5).toHex();
+        it.replace(QString("%webId%"),webId);
+        it.replace(QString("%webUrl%"),webUrl);
+        qml = qml + it.toUtf8();
+    }
+    return qml;
+}
+
+QByteArray Playlist::addQmlVideos(QByteArray &qml)
+{
+     QString videoTemplate = loadTemplate(":/qml_stubs/video.txt");
+     QList<QString> images = listMedia(QList<QString>({QString("Video")}));
+     foreach (QString imageId, images) {
+         QString it(videoTemplate);
+         it.replace(QString("%videoId%"),imageId);
+         it.replace(QString("%videoFile%"),getDataPath()+imageId);
+         qml = qml + it.toUtf8();
+     }
+     return qml;
+}
+
+QByteArray Playlist::addQmlStates(QByteArray &qml)
+{
+    qml += "states: [\n";
+    QJsonArray resourcesArray = playlistInfo.object()["resources"].toArray();
+    for (int levelIndex = 0; levelIndex < resourcesArray.size(); ++levelIndex) {
+        QJsonObject mediaResource = resourcesArray[levelIndex].toObject();
+
+        if (!mediaResource["active"].toBool())
+            continue;
+
+        if (!known_media.contains(mediaResource["type"].toString()))
+            continue;
+
+        const QString propertyChange("PropertyChanges {target: id%target%\n opacity: %op% }\n");
+        const QString timerProperty("PropertyChanges {target: timer \n interval: %toNextTick% }");
+
+        QString state("State {\n");
+
+            QString actualTargetChange(propertyChange);
+            QString targetId = getTargetId(mediaResource);
+
+            actualTargetChange.replace("%target%",targetId);
+            actualTargetChange.replace("%op%","1");
+            state.append(actualTargetChange);
+
+            int previewsMediaResourceIndex = findPreviousResource(resourcesArray,levelIndex);
+            if (previewsMediaResourceIndex != levelIndex ){
+                QJsonObject previewsMediaResource = resourcesArray[previewsMediaResourceIndex].toObject();
+                QString targetId = getTargetId(previewsMediaResource);
+                QString previewsTargetChange(propertyChange);
+
+                previewsTargetChange.replace("%target%",targetId);
+                previewsTargetChange.replace("%op%","0");
+                state.append(previewsTargetChange);
+            }
+
+            QString timerChange(timerProperty);
+            int duration = mediaResource["duration"].toInt();
+            timerChange.replace("%toNextTick%",QString("%1").arg(duration)+"000");
+            state.append(timerChange);
+
+        state.append("},\n");
+        qml.append(state.toUtf8());
+    }
+    qml.remove(qml.size()-2,1); //remove the trailing ","
+    qml += "]\n";
+    return qml;
+}
+
+QByteArray Playlist::addQmlTimer(QByteArray &qml)
+{
+    QString header = loadTemplate(":/qml_stubs/timer.txt");
+    qml = qml + header.toUtf8();
+    return qml;
+}
+
+QString Playlist::loadTemplate(const QString templateFileName)
+{
+    QFile templateFile(templateFileName);
+    templateFile.open(QFile::ReadOnly);
+    QByteArray fileData(templateFile.readAll());
+    return QString(fileData);
+}
+
+int Playlist::findPreviousResource(const QJsonArray &resourcesArray, const int levelIndex)
+{
+    int size = resourcesArray.size();
+    int position = levelIndex-1;
+    int count = 0;
+    while(1){
+        if (position < 0)
+            position = size-1;
+        QJsonObject previousObject = resourcesArray[position].toObject();
+        if (known_media.contains(previousObject["type"].toString()))
+            return position;
+        count++;
+        if (count == size)
+            return levelIndex; //if no other proper media found, return the same index
+        position--;
+    }
+}
+
+QList<QString> Playlist::listMedia(const QList<QString> mediaTypes, const QString attribute)
+{
     QList<QString> files;
     QJsonArray resourcesArray = playlistInfo.object()["resources"].toArray();
     for (int levelIndex = 0; levelIndex < resourcesArray.size(); ++levelIndex) {
         QJsonObject resource = resourcesArray[levelIndex].toObject();
         QString resourceType = resource["type"].toString();
-        if ( resourceType == "Image" || resourceType == "Video" ) {
-            files << resource["id"].toString();
-        } else {
-            qDebug() << "Unhandled resource:" << resource["type"].toString();
+        if ( mediaTypes.contains(resourceType)) {
+            files << resource[attribute].toString();
         }
-
     }
     return files;
 }
 
 
+QString Playlist::getTargetId(const QJsonObject &mediaResource)
+{
+    QString targetId;
+    if (mediaResource["type"].toString() == "WWW"){
+        QString webUrl = mediaResource["url"].toString();
+        targetId = QCryptographicHash::hash((webUrl.toUtf8()),QCryptographicHash::Md5).toHex();
+    }
+    else
+        targetId = mediaResource["id"].toString();
+    return targetId;
+}

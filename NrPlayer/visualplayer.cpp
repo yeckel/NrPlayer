@@ -2,8 +2,8 @@
 
 VisualPlayer::VisualPlayer(QObject *parent) : QObject(parent)
 {
-    //view = new QQuickView;
-    //view->showFullScreen();
+    view = new QQuickView;
+    view->showFullScreen();
 }
 
 VisualPlayer::~VisualPlayer()

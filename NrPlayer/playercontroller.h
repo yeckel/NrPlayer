@@ -36,6 +36,7 @@ private:
     void requestPlaylist();
     void loadPlaylistFromFS();
     bool makeMediaFilesReady();
+    void processStates();
 };
 
 #endif // PLAYERCONTROLLER_H

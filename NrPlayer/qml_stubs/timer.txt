@@ -1,0 +1,16 @@
+        Timer {
+            id: timer
+            interval: 2000
+            running: true
+            repeat: true
+            property int direction: 1            
+            property int counter: 0
+
+            onTriggered: {                
+                nrPlayer.state = nrPlayer.states[counter].name
+                counter = counter + direction
+                if (counter >= nrPlayer.states.length ) {
+                    counter = 0
+                }
+            }
+        }

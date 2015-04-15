@@ -1,5 +1,10 @@
 <RCC>
     <qresource prefix="/">
         <file>authentication.qml</file>
+        <file>qml_stubs/playlist_header.txt</file>
+        <file>qml_stubs/image.txt</file>
+        <file>qml_stubs/timer.txt</file>
+        <file>qml_stubs/video.txt</file>
+        <file>qml_stubs/webview.txt</file>
     </qresource>
 </RCC>

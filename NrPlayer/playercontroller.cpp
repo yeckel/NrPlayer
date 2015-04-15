@@ -29,6 +29,11 @@ PlayerController::~PlayerController()
 void PlayerController::update()
 {
     qDebug() << "Update Tick";
+    processStates();
+    updateTimer.start();
+}
+
+void PlayerController::processStates(){
     switch(controllerState) {
     case NOT_AUTHENTICATED:
         authenticate();
@@ -40,11 +45,11 @@ void PlayerController::update()
         loadPlaylistFromFS();
         break;
     case PLAY:
+        qDebug() << playlist.data()->toQML();
         break;
     default:
         break;
     }
-    updateTimer.start();
 }
 
 void PlayerController::requestPlaylist() {
@@ -70,12 +75,17 @@ void PlayerController::authenticate() {
 void PlayerController::loadPlaylistFromFS() {
     QString currentPlaylistId = settings.value("Main/playlistId").toString();
     playlist = QSharedPointer<Playlist>(loadSavedPlaylist(currentPlaylistId));
-    if (playlist.data()->playlistIsValid())
+    if (!playlist.isNull() && playlist.data()->playlistIsValid()){
         if (makeMediaFilesReady())
             controllerState = PLAY;
+    }else{
+        controllerState = WITHOUT_PLAYLIST;
+        processStates();
+    }
 }
 
 bool PlayerController::makeMediaFilesReady() {
+    qDebug() << Q_FUNC_INFO;
     QList<QString> fileList = playlist.data()->listMediaFiles();
     QList<QString> missingFiles = missingMediaFiles(fileList);
     if ( netClient.downloadFiles(missingFiles,settings.value("Main/playerId").toString()) ) {

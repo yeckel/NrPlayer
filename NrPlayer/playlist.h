@@ -30,7 +30,9 @@ public:
     }
     QByteArray toJson() const;
     QList<QString> listMediaFiles();
+    QByteArray toQML();
 
+    QList<QString> listMedia(const QList<QString> mediaTypes, const QString attribute = "id");
 signals:
 
 public slots:
@@ -40,6 +42,17 @@ private:
     QByteArray playlistId;
     uint version;
     bool isValid;
+    QByteArray addQmlHeader(QByteArray &qml);
+    QByteArray addQmlImages(QByteArray &qml);
+    QByteArray addQmlWebs(QByteArray &qml);
+    QByteArray addQmlVideos(QByteArray &qml);
+    QByteArray addQmlStates(QByteArray &qml);
+    QByteArray addQmlTimer(QByteArray &qml);
+
+    QString loadTemplate(const QString templateFileName);
+    int findPreviousResource(const QJsonArray &resourcesArray,const int levelIndex);
+    QList<QString> known_media;
+    QString getTargetId(const QJsonObject &mediaResource);
 };
 
 #endif // PLAYLIST_H

@@ -4,7 +4,7 @@
 bool savePlaylist(QSharedPointer<Playlist> playlist)
 {
     QByteArray playlistJson = playlist.data()->toJson();
-    QString dataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString dataPath = getDataPath();
 
     QFile playlist_file(dataPath+"/"+playlist.data()->getPlaylistId()+".json");
     if (!playlist_file.open(QIODevice::WriteOnly)) {
@@ -18,14 +18,14 @@ bool savePlaylist(QSharedPointer<Playlist> playlist)
 
 void setupDataStore()
 {
-    QString dataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString dataPath = getDataPath();
     QDir().mkpath(dataPath);
 }
 
 
 Playlist *loadSavedPlaylist(const QString playlistId)
 {
-    QString dataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString dataPath = getDataPath();
 
     QFile playlist_file(dataPath+"/"+playlistId+".json");
     if (!playlist_file.open(QIODevice::ReadOnly)) {
@@ -37,7 +37,7 @@ Playlist *loadSavedPlaylist(const QString playlistId)
 
 }
 bool saveMediaFile(const QByteArray &data,const QString filename) {
-    QString dataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString dataPath = getDataPath();
 
     QFile file(dataPath+"/"+filename);
     if (!file.open(QIODevice::WriteOnly)) {
@@ -51,7 +51,7 @@ bool saveMediaFile(const QByteArray &data,const QString filename) {
 
 QList<QString> missingMediaFiles(const QList<QString> fileList)
 {
-    QString dataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString dataPath = getDataPath();
 
     QList<QString> missingFiles;
     foreach (QString fileName, fileList) {
@@ -59,4 +59,10 @@ QList<QString> missingMediaFiles(const QList<QString> fileList)
             missingFiles << fileName;
     }
     return missingFiles;
+}
+
+
+QString getDataPath()
+{
+    return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/";
 }

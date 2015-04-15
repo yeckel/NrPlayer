@@ -1,0 +1,6 @@
+        WebView {
+            id: id%webId%
+            opacity: 0
+            url: "%webUrl%"
+            anchors.fill: parent
+        }

@@ -1,0 +1,7 @@
+	Image {
+            id: id%imageId%
+            source: "%fileName%"
+            smooth: true
+            opacity: 0
+            anchors.fill: parent
+        }

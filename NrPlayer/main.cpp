@@ -2,7 +2,7 @@
 #include "playercontroller.h"
 
 int main(int argc, char *argv[])
-{
+{    
     QGuiApplication a(argc, argv);
 
     QCoreApplication::setOrganizationName("LTSoft");
