@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QtQuick>
+#include "playlist.h"
+#include "filesytem.h"
 
 class VisualPlayer : public QObject
 {
@@ -15,6 +17,7 @@ signals:
 
 public slots:
     void showAuthCode(const QString pairingCode);
+    bool play(const Playlist *playlist);
 private:
     QQuickView *view;
 };

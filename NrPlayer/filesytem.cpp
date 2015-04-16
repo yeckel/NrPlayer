@@ -62,7 +62,7 @@ QList<QString> missingMediaFiles(const QList<QString> fileList)
 }
 
 
-QString getDataPath()
+QString getDataPath(const QString fileName)
 {
-    return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/";
+    return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/"+fileName;
 }

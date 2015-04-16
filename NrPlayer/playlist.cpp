@@ -62,7 +62,7 @@ QList<QString> Playlist::listMediaFiles()
     return listMedia(mediaTypes);
 }
 
-QByteArray Playlist::toQML()
+QByteArray Playlist::toQML() const
 {
     QByteArray finalQml;
     addQmlHeader(finalQml);
@@ -75,7 +75,7 @@ QByteArray Playlist::toQML()
     return finalQml;
 }
 
-QByteArray Playlist::addQmlHeader(QByteArray &qml)
+QByteArray Playlist::addQmlHeader(QByteArray &qml) const
 {
     QString header = loadTemplate(":/qml_stubs/playlist_header.txt");
     //header.replace(QString("%playlistId%"),QString(this->playlistId));
@@ -83,7 +83,7 @@ QByteArray Playlist::addQmlHeader(QByteArray &qml)
     return qml;
 }
 
-QByteArray Playlist::addQmlImages(QByteArray &qml)
+QByteArray Playlist::addQmlImages(QByteArray &qml) const
 {
     QString imageTemplate = loadTemplate(":/qml_stubs/image.txt");
 
@@ -97,7 +97,7 @@ QByteArray Playlist::addQmlImages(QByteArray &qml)
     return qml;
 }
 
-QByteArray Playlist::addQmlWebs(QByteArray &qml)
+QByteArray Playlist::addQmlWebs(QByteArray &qml) const
 {
     QString webTemplate = loadTemplate(":/qml_stubs/webview.txt");
     QList<QString> webs = listMedia(QList<QString>({QString("WWW")}),"url");
@@ -111,7 +111,7 @@ QByteArray Playlist::addQmlWebs(QByteArray &qml)
     return qml;
 }
 
-QByteArray Playlist::addQmlVideos(QByteArray &qml)
+QByteArray Playlist::addQmlVideos(QByteArray &qml) const
 {
      QString videoTemplate = loadTemplate(":/qml_stubs/video.txt");
      QList<QString> images = listMedia(QList<QString>({QString("Video")}));
@@ -124,7 +124,7 @@ QByteArray Playlist::addQmlVideos(QByteArray &qml)
      return qml;
 }
 
-QByteArray Playlist::addQmlStates(QByteArray &qml)
+QByteArray Playlist::addQmlStates(QByteArray &qml) const
 {
     qml += "states: [\n";
     QJsonArray resourcesArray = playlistInfo.object()["resources"].toArray();
@@ -188,14 +188,14 @@ QByteArray Playlist::addQmlStates(QByteArray &qml)
     return qml;
 }
 
-QByteArray Playlist::addQmlTimer(QByteArray &qml)
+QByteArray Playlist::addQmlTimer(QByteArray &qml) const
 {
     QString header = loadTemplate(":/qml_stubs/timer.txt");
     qml = qml + header.toUtf8();
     return qml;
 }
 
-QString Playlist::loadTemplate(const QString templateFileName)
+QString Playlist::loadTemplate(const QString templateFileName) const
 {
     QFile templateFile(templateFileName);
     templateFile.open(QFile::ReadOnly);
@@ -203,7 +203,7 @@ QString Playlist::loadTemplate(const QString templateFileName)
     return QString(fileData);
 }
 
-int Playlist::findPreviousResource(const QJsonArray &resourcesArray, const int levelIndex)
+int Playlist::findPreviousResource(const QJsonArray &resourcesArray, const int levelIndex) const
 {
     int size = resourcesArray.size();
     int position = levelIndex-1;
@@ -221,7 +221,7 @@ int Playlist::findPreviousResource(const QJsonArray &resourcesArray, const int l
     }
 }
 
-QList<QString> Playlist::listMedia(const QList<QString> mediaTypes, const QString attribute)
+QList<QString> Playlist::listMedia(const QList<QString> mediaTypes, const QString attribute) const
 {
     QList<QString> files;
     QJsonArray resourcesArray = playlistInfo.object()["resources"].toArray();
@@ -236,7 +236,7 @@ QList<QString> Playlist::listMedia(const QList<QString> mediaTypes, const QStrin
 }
 
 
-QString Playlist::getTargetId(const QJsonObject &mediaResource)
+QString Playlist::getTargetId(const QJsonObject &mediaResource) const
 {
     QString targetId;
     if (mediaResource["type"].toString() == "WWW"){

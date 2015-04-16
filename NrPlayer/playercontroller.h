@@ -11,7 +11,7 @@
 class PlayerController : public QObject
 {
     Q_OBJECT
-    enum ControllerStatus {INIT_FROM_FS,NOT_AUTHENTICATED, WITHOUT_PLAYLIST, PLAY};
+    enum ControllerStatus {INIT_FROM_FS,NOT_AUTHENTICATED, WITHOUT_PLAYLIST, PLAY, PLAYING};
 public:
     explicit PlayerController(QObject *parent = 0);
     ~PlayerController();

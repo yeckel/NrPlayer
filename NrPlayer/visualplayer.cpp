@@ -18,3 +18,15 @@ void VisualPlayer::showAuthCode(const QString pairingCode)
 
 }
 
+bool VisualPlayer::play(const Playlist *playlist)
+{
+    QByteArray qml = playlist->toQML();
+    QString qmlFileName = playlist->getPlaylistId()+".qml";
+    if ( saveMediaFile(qml,qmlFileName) ){
+        QString qmlFilePath = getDataPath(qmlFileName);
+        view->setSource(QUrl(qmlFilePath));
+        return true;
+    }
+    return false;
+}
+

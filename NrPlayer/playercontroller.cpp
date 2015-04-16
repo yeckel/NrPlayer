@@ -18,8 +18,7 @@ PlayerController::PlayerController(QObject *parent) : QObject(parent)
     updateTimer.setInterval(settings.value("Main/UpdateInterval",10000).toUInt());
     updateTimer.setSingleShot(true);
     connect(&updateTimer,SIGNAL(timeout()),this,SLOT(update()));
-    updateTimer.start();
-    update();
+    processStates();
 }
 
 PlayerController::~PlayerController()
@@ -37,15 +36,22 @@ void PlayerController::processStates(){
     switch(controllerState) {
     case NOT_AUTHENTICATED:
         authenticate();
+        updateTimer.start();
         break;
     case WITHOUT_PLAYLIST:
         requestPlaylist();
         break;
     case INIT_FROM_FS:
         loadPlaylistFromFS();
+        updateTimer.start();
         break;
     case PLAY:
-        qDebug() << playlist.data()->toQML();
+        if (!playlist.isNull() && player.play(playlist.data()))
+                controllerState = PLAYING;
+        break;
+    case PLAYING:
+        qDebug() << "playing";
+        updateTimer.start();
         break;
     default:
         break;
