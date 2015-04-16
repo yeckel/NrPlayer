@@ -19,7 +19,7 @@ public:
 signals:
     void stateUpdated(ControllerStatus status);
 public slots:
-    void update();
+    void timerUpdate();
 private slots:
     void changeContollerState(ControllerStatus newStatus);
 private:

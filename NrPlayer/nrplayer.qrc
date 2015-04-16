@@ -6,5 +6,6 @@
         <file>qml_stubs/timer.txt</file>
         <file>qml_stubs/video.txt</file>
         <file>qml_stubs/webview.txt</file>
+        <file>synchronizing.qml</file>
     </qresource>
 </RCC>

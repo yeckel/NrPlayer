@@ -19,7 +19,7 @@ PlayerController::PlayerController(QObject *parent) :
 
     updateTimer.setInterval(settings.value("Main/UpdateInterval",10000).toUInt());
     updateTimer.setSingleShot(true);
-    connect(&updateTimer,SIGNAL(timeout()),this,SLOT(update()));
+    connect(&updateTimer,SIGNAL(timeout()),this,SLOT(timerUpdate()));
 
     connect(this,SIGNAL(stateUpdated(ControllerStatus)),this,SLOT(changeContollerState(ControllerStatus)));
     emit(stateUpdated(initialState));
@@ -29,7 +29,7 @@ PlayerController::~PlayerController()
 {
 
 }
-void PlayerController::update()
+void PlayerController::timerUpdate()
 {
     qDebug() << "Update Tick";    
     changeContollerState(controllerState);
@@ -48,6 +48,7 @@ void PlayerController::changeContollerState(PlayerController::ControllerStatus n
             updateTimer.start();
         break;
     case WITHOUT_PLAYLIST:
+        player.showSyncMessage();
         if (requestPlaylistAndMedia())
             emit(stateUpdated(READY_TO_PLAY));
         else

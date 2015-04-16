@@ -18,6 +18,12 @@ void VisualPlayer::showAuthCode(const QString pairingCode)
 
 }
 
+void VisualPlayer::showSyncMessage()
+{
+    view->setSource(QUrl(QStringLiteral("qrc:/synchronizing.qml")));
+
+}
+
 bool VisualPlayer::play(const Playlist *playlist)
 {
     QByteArray qml = playlist->toQML();

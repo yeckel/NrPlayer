@@ -18,6 +18,7 @@ signals:
 public slots:
     void showAuthCode(const QString pairingCode);
     bool play(const Playlist *playlist);
+    void showSyncMessage();
 private:
     QQuickView *view;
 };
