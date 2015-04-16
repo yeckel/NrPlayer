@@ -14,6 +14,8 @@ PlayerController::PlayerController(QObject *parent) :
     if (initialState == INIT_FROM_FS && !settings.contains("Main/playerId"))
         initialState = NOT_AUTHENTICATED;
 
+    playerId = settings.value("Main/playerId").toString();
+
     if (initialState == INIT_FROM_FS && !settings.contains("Main/playlistId"))
         initialState = WITHOUT_PLAYLIST;
 
@@ -62,11 +64,16 @@ void PlayerController::changeContollerState(PlayerController::ControllerStatus n
         break;
     case READY_TO_PLAY:
         if (!playlist.isNull() && player.play(playlist.data()))
-                controllerState = PLAYING;
+             emit(stateUpdated(PLAYING));
         break;
     case PLAYING:
-        qDebug() << "playing";
-        updateTimer.start();
+    {
+        QScopedPointer<Playlist> newPlaylist(netClient.downloadPlaylist(playerId));
+        if (playlist.data()->isDifferent(newPlaylist.data())){
+            emit (stateUpdated(WITHOUT_PLAYLIST));
+        }else
+            updateTimer.start();
+    }
         break;
     default:
         break;
@@ -85,11 +92,12 @@ bool PlayerController::requestPlaylistAndMedia() {
 }
 
 bool PlayerController::authenticate() {
-    QString pairingCode("21121");
+    QString pairingCode = QString::number(createRandomPlayerId());
     player.showAuthCode(pairingCode);
     QString pairingId = netClient.authenticate(pairingCode);
     if (pairingId != "") {
         settings.setValue("Main/playerId",pairingId);
+        playerId = pairingId;
         return true;
     }
     return false;

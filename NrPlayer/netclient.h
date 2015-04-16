@@ -25,14 +25,16 @@ public:
     explicit NetClient(QObject *parent = 0);
     ~NetClient();
     bool downloadMediaFile(const QString filename, const QString playerId);
+    bool downloadFiles(const QList<QString> filesToDownload, const QString playerId);    
 
-    bool downloadFiles(const QList<QString> filesToDownload, const QString playerId);
 signals:
 
 public slots:
     QString authenticate(const QString pairingCode);
     Playlist *downloadPlaylist(const QString playerId);
 private:
+    QString serverUrl;
+    QSettings settings;
 };
 
 #endif // NETCLIENT_H

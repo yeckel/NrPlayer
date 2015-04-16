@@ -31,6 +31,7 @@ private:
     //Playlist *playlist;
     QSharedPointer<Playlist> playlist;
     QString pairingId;
+    QString playerId;
 
     bool authenticate();
 

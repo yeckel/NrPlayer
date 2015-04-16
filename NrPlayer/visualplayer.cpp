@@ -26,11 +26,14 @@ void VisualPlayer::showSyncMessage()
 
 bool VisualPlayer::play(const Playlist *playlist)
 {
+    //TODO check if qml returned by toQML is valid qml
     QByteArray qml = playlist->toQML();
     QString qmlFileName = playlist->getPlaylistId()+".qml";
     if ( saveMediaFile(qml,qmlFileName) ){
+        qDebug() << "switching playlist";
         QString qmlFilePath = getDataPath(qmlFileName);
-        view->setSource(QUrl(qmlFilePath));
+        view->engine()->clearComponentCache();
+        view->setSource(QUrl(qmlFilePath));        
         return true;
     }
     return false;

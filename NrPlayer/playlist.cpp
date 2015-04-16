@@ -46,7 +46,7 @@ Playlist::Playlist(const QByteArray &jsonData, QObject *parent): QObject(parent)
 
 Playlist::~Playlist()
 {
-    qDebug() << "Playlist Deleted";
+    //qDebug() << "Playlist Deleted";
 }
 
 
@@ -233,6 +233,15 @@ QList<QString> Playlist::listMedia(const QList<QString> mediaTypes, const QStrin
         }
     }
     return files;
+}
+
+bool Playlist::isDifferent(const Playlist *b) const
+{
+    if (this->version != b->version)
+        return true;
+    if (this->playlistId != b->playlistId)
+        return true;
+    return false;
 }
 
 

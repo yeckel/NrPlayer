@@ -2,7 +2,8 @@
 
 NetClient::NetClient(QObject *parent) : QObject(parent)
 {
-
+    serverUrl = settings.value("Main/ServerURL","https://www.nuvelar.com/remote/index.php/").toString();
+    settings.setValue("Main/ServerURL",serverUrl);
 }
 
 NetClient::~NetClient()
@@ -17,7 +18,7 @@ QString NetClient::authenticate(const QString pairingCode)
     QObject::connect(&manager, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
 
     QNetworkRequest req;
-    req.setUrl(QUrl("https://www.nuvelar.com/remote/index.php/connect"));
+    req.setUrl(QUrl(serverUrl+"/connect"));
     req.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
     QJsonObject pairingData
     {
@@ -45,13 +46,13 @@ QString NetClient::authenticate(const QString pairingCode)
 
 Playlist* NetClient::downloadPlaylist(const QString playerId)
 {
-    qDebug() << Q_FUNC_INFO;
+    //qDebug() << Q_FUNC_INFO;
     QEventLoop eventLoop;
     QNetworkAccessManager manager;
     QObject::connect(&manager, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
 
-    QNetworkRequest req;
-    req.setUrl(QUrl("https://www.nuvelar.com/remote/index.php/getState"));
+    QNetworkRequest req;    
+    req.setUrl(QUrl(serverUrl+"/getState"));
     req.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
 
     QByteArray jsonData = "{\"media\":[],\"playlists\":[],\"resources\":[]}";
@@ -90,7 +91,7 @@ bool NetClient::downloadMediaFile(const QString filename, const QString playerId
     QObject::connect(&manager, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
 
     QNetworkRequest req;
-    req.setUrl(QUrl("https://www.nuvelar.com/remote/index.php/downloadFile"));
+    req.setUrl(QUrl(serverUrl+"/downloadFile"));
     req.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
     QJsonObject fileData
     {
@@ -118,7 +119,7 @@ bool NetClient::downloadMediaFile(const QString filename, const QString playerId
 }
 
 bool NetClient::downloadFiles(const QList<QString> filesToDownload,const QString playerId) {
-    qDebug() << Q_FUNC_INFO;
+    //qDebug() << Q_FUNC_INFO;
     foreach (QString fileName, filesToDownload) {
         if (!downloadMediaFile(fileName,playerId)) {
             qDebug() << "Failed downloading:" << fileName;
