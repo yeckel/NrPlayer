@@ -27,11 +27,11 @@ private:
     QSettings settings;
     NetClient netClient;
     ControllerStatus controllerState;
-    VisualPlayer player;
-    //Playlist *playlist;
+    VisualPlayer player;    
     QSharedPointer<Playlist> playlist;
     QString pairingId;
     QString playerId;
+    QString pairingCode;
 
     bool authenticate();
 

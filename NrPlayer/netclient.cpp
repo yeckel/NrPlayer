@@ -11,110 +11,80 @@ NetClient::~NetClient()
 
 }
 
-QString NetClient::authenticate(const QString pairingCode)
+QByteArray NetClient::requestServer(const QJsonObject jsonPostData,const QString resource)
 {
+    QByteArray responseData;
     QEventLoop eventLoop;
     QNetworkAccessManager manager;
     QObject::connect(&manager, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
 
     QNetworkRequest req;
-    req.setUrl(QUrl(serverUrl+"/connect"));
+    req.setUrl(QUrl(serverUrl+"/"+resource));
     req.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
-    QJsonObject pairingData
-    {
-        {"pairingId", encondeId(pairingCode)},
-    };
-    QByteArray data = QJsonDocument(pairingData).toJson();
+
+    QByteArray data = QJsonDocument(jsonPostData).toJson();
     QByteArray base64Data = data.toBase64();
     QByteArray requestHash = calcHmac(data);
     QByteArray postData("data=" + base64Data+"&requestHash="+requestHash);
     QScopedPointer<QNetworkReply> reply(manager.post(req,postData));
 
-    eventLoop.exec(); // blocks stack until "finished()" has been called
+    eventLoop.exec();
 
     if (reply.data()->error() == QNetworkReply::NoError) {
-        QByteArray responseData = reply.data()->readAll();
-        QJsonDocument loadDoc(QJsonDocument::fromJson(responseData));
-        QJsonObject json = loadDoc.object();
-        return json["playerId"].toString();
+        responseData = reply.data()->readAll();
+        return responseData;
     }
     else {
-        qDebug() << "Failure" <<reply.data()->errorString();
+        responseData = QByteArray::number(reply.data()->error());
+        qDebug() << "Failure" <<reply.data()->errorString() << "data:" << responseData;
     }
-    return QString();
+
+    return responseData;
+}
+
+QString NetClient::authenticate(const QString pairingCode)
+{
+    QJsonObject jsonPostData
+    {
+        {"pairingId", encondeId(pairingCode)},
+    };
+
+    QByteArray reply = requestServer(jsonPostData,"connect");
+    QJsonDocument loadDoc(QJsonDocument::fromJson(reply));
+    QJsonObject json = loadDoc.object();
+    return json["playerId"].toString();
 }
 
 Playlist* NetClient::downloadPlaylist(const QString playerId)
 {
     //qDebug() << Q_FUNC_INFO;
-    QEventLoop eventLoop;
-    QNetworkAccessManager manager;
-    QObject::connect(&manager, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
-
-    QNetworkRequest req;    
-    req.setUrl(QUrl(serverUrl+"/getState"));
-    req.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
-
     QByteArray jsonData = "{\"media\":[],\"playlists\":[],\"resources\":[]}";
 
     QJsonDocument jd = QJsonDocument::fromJson(jsonData);
-    QJsonObject fileData
+    QJsonObject jsonPostData
     {
         {"playerId",playerId},
         {"fileList",jd.object()}
     };
 
-    QByteArray data = QJsonDocument(fileData).toJson();
-    QByteArray base64Data = data.toBase64();
-    QByteArray requestHash = calcHmac(data);
-    QByteArray postData("data=" + base64Data+"&requestHash="+requestHash);
+    QByteArray responseData = requestServer(jsonPostData,"getState");
 
-    QScopedPointer<QNetworkReply> reply(manager.post(req,postData));
+    return new Playlist(responseData);
 
-    eventLoop.exec(); // blocks stack until "finished()" has been called
-
-    if (reply.data()->error() == QNetworkReply::NoError) {
-
-        QByteArray responseData = reply.data()->readAll();
-
-        return new Playlist(responseData);
-    }
-    else {
-        qDebug() << "Failure" <<reply->errorString();
-    }
-    return new Playlist();
 }
 
 bool NetClient::downloadMediaFile(const QString filename, const QString playerId) {
-    QEventLoop eventLoop;
-    QNetworkAccessManager manager;
-    QObject::connect(&manager, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
 
-    QNetworkRequest req;
-    req.setUrl(QUrl(serverUrl+"/downloadFile"));
-    req.setHeader(QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
-    QJsonObject fileData
+    QJsonObject jsonPostData
     {
         {"playerId", playerId},
         {"fileName", filename},
         {"fileType","media"}
     };
 
-    QByteArray data = QJsonDocument(fileData).toJson();
-    QByteArray base64Data = data.toBase64();
-    QByteArray requestHash = calcHmac(data);
-    QByteArray postData("data=" + base64Data+"&requestHash="+requestHash);
-    QScopedPointer<QNetworkReply> reply(manager.post(req,postData));
-
-    eventLoop.exec(); // blocks stack until "finished()" has been called
-
-    if (reply.data()->error() == QNetworkReply::NoError) {
-        if (saveMediaFile(reply.data()->readAll(),filename))
-            return true;
-    }
-    else {
-        qDebug() << "Failure" <<reply.data()->errorString();
-    }
+    QByteArray responseData = requestServer(jsonPostData,"downloadFile");
+    if (saveMediaFile(responseData,filename))
+        return true;
     return false;
 }
 

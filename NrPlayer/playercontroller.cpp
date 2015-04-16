@@ -5,6 +5,7 @@ PlayerController::PlayerController(QObject *parent) :
     QObject(parent),controllerState(INIT_FROM_FS)
 {
     ControllerStatus initialState = INIT_FROM_FS;
+    pairingCode = QString::number(createRandomPlayerId());
 
     setupDataStore();
 
@@ -91,8 +92,7 @@ bool PlayerController::requestPlaylistAndMedia() {
     return false;
 }
 
-bool PlayerController::authenticate() {
-    QString pairingCode = QString::number(createRandomPlayerId());
+bool PlayerController::authenticate() {    
     player.showAuthCode(pairingCode);
     QString pairingId = netClient.authenticate(pairingCode);
     if (pairingId != "") {
@@ -114,7 +114,7 @@ bool PlayerController::loadPlaylistFromFS() {
 }
 
 bool PlayerController::makeMediaFilesReady() {
-    qDebug() << Q_FUNC_INFO;
+    //qDebug() << Q_FUNC_INFO;
     QList<QString> fileList = playlist.data()->listMediaFiles();
     QList<QString> missingFiles = missingMediaFiles(fileList);
     if ( netClient.downloadFiles(missingFiles,settings.value("Main/playerId").toString()) ) {

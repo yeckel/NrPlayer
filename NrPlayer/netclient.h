@@ -27,6 +27,7 @@ public:
     bool downloadMediaFile(const QString filename, const QString playerId);
     bool downloadFiles(const QList<QString> filesToDownload, const QString playerId);    
 
+    QScopedPointer<QNetworkReply> requestServer();
 signals:
 
 public slots:
@@ -35,6 +36,7 @@ public slots:
 private:
     QString serverUrl;
     QSettings settings;
+    QByteArray requestServer(const QJsonObject jsonPostData, const QString resource);
 };
 
 #endif // NETCLIENT_H
