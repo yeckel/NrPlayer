@@ -1,24 +1,28 @@
 #include "playercontroller.h"
 #include <QDebug>
 
-PlayerController::PlayerController(QObject *parent) : QObject(parent)
+PlayerController::PlayerController(QObject *parent) :
+    QObject(parent),controllerState(INIT_FROM_FS)
 {
-    controllerState = INIT_FROM_FS;
+    ControllerStatus initialState = INIT_FROM_FS;
+
     setupDataStore();
 
     if (!settings.contains("Main/UpdateInterval"))
         settings.setValue("Main/UpdateInterval",10000); //10s
 
-    if (controllerState == INIT_FROM_FS && !settings.contains("Main/playerId"))
-        controllerState = NOT_AUTHENTICATED;
+    if (initialState == INIT_FROM_FS && !settings.contains("Main/playerId"))
+        initialState = NOT_AUTHENTICATED;
 
-    if (controllerState == INIT_FROM_FS && !settings.contains("Main/playlistId"))
-        controllerState = WITHOUT_PLAYLIST;
+    if (initialState == INIT_FROM_FS && !settings.contains("Main/playlistId"))
+        initialState = WITHOUT_PLAYLIST;
 
     updateTimer.setInterval(settings.value("Main/UpdateInterval",10000).toUInt());
     updateTimer.setSingleShot(true);
     connect(&updateTimer,SIGNAL(timeout()),this,SLOT(update()));
-    processStates();
+
+    connect(this,SIGNAL(stateUpdated(ControllerStatus)),this,SLOT(changeContollerState(ControllerStatus)));
+    emit(stateUpdated(initialState));
 }
 
 PlayerController::~PlayerController()
@@ -27,25 +31,35 @@ PlayerController::~PlayerController()
 }
 void PlayerController::update()
 {
-    qDebug() << "Update Tick";
-    processStates();
-    updateTimer.start();
+    qDebug() << "Update Tick";    
+    changeContollerState(controllerState);
 }
 
-void PlayerController::processStates(){
-    switch(controllerState) {
+void PlayerController::changeContollerState(PlayerController::ControllerStatus newStatus)
+{
+    qDebug() << "Old state:" << controllerState << " new state:" << newStatus;
+    controllerState = newStatus;
+
+    switch(newStatus) {
     case NOT_AUTHENTICATED:
-        authenticate();
-        updateTimer.start();
+        if (authenticate())
+            emit(stateUpdated(WITHOUT_PLAYLIST));
+        else
+            updateTimer.start();
         break;
     case WITHOUT_PLAYLIST:
-        requestPlaylist();
+        if (requestPlaylistAndMedia())
+            emit(stateUpdated(READY_TO_PLAY));
+        else
+            updateTimer.start();
         break;
     case INIT_FROM_FS:
-        loadPlaylistFromFS();
-        updateTimer.start();
+        if (loadPlaylistFromFS())
+            emit(stateUpdated(READY_TO_PLAY));
+        else
+            emit(stateUpdated(WITHOUT_PLAYLIST));
         break;
-    case PLAY:
+    case READY_TO_PLAY:
         if (!playlist.isNull() && player.play(playlist.data()))
                 controllerState = PLAYING;
         break;
@@ -58,36 +72,36 @@ void PlayerController::processStates(){
     }
 }
 
-void PlayerController::requestPlaylist() {
+bool PlayerController::requestPlaylistAndMedia() {
     playlist = QSharedPointer<Playlist>(netClient.downloadPlaylist(settings.value("Main/playerId","").toString()));
     if (playlist.data()->playlistIsValid()) {
         settings.setValue("Main/playlistId",QString(playlist.data()->getPlaylistId()));
         savePlaylist(playlist);
         if (makeMediaFilesReady())
-            controllerState = PLAY;
+            return true;
     }
+    return false;
 }
 
-void PlayerController::authenticate() {
+bool PlayerController::authenticate() {
     QString pairingCode("21121");
     player.showAuthCode(pairingCode);
     QString pairingId = netClient.authenticate(pairingCode);
     if (pairingId != "") {
         settings.setValue("Main/playerId",pairingId);
-        controllerState = WITHOUT_PLAYLIST;
+        return true;
     }
+    return false;
 }
 
-void PlayerController::loadPlaylistFromFS() {
+bool PlayerController::loadPlaylistFromFS() {
     QString currentPlaylistId = settings.value("Main/playlistId").toString();
     playlist = QSharedPointer<Playlist>(loadSavedPlaylist(currentPlaylistId));
     if (!playlist.isNull() && playlist.data()->playlistIsValid()){
         if (makeMediaFilesReady())
-            controllerState = PLAY;
-    }else{
-        controllerState = WITHOUT_PLAYLIST;
-        processStates();
+            return true;
     }
+    return false;
 }
 
 bool PlayerController::makeMediaFilesReady() {

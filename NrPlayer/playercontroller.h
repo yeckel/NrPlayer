@@ -11,15 +11,17 @@
 class PlayerController : public QObject
 {
     Q_OBJECT
-    enum ControllerStatus {INIT_FROM_FS,NOT_AUTHENTICATED, WITHOUT_PLAYLIST, PLAY, PLAYING};
+    enum ControllerStatus {INIT_FROM_FS,NOT_AUTHENTICATED, WITHOUT_PLAYLIST, READY_TO_PLAY, PLAYING};
 public:
     explicit PlayerController(QObject *parent = 0);
     ~PlayerController();
 
 signals:
-
+    void stateUpdated(ControllerStatus status);
 public slots:
     void update();
+private slots:
+    void changeContollerState(ControllerStatus newStatus);
 private:
     QTimer updateTimer;
     QSettings settings;
@@ -30,13 +32,12 @@ private:
     QSharedPointer<Playlist> playlist;
     QString pairingId;
 
-    void authenticate();
+    bool authenticate();
 
 
-    void requestPlaylist();
-    void loadPlaylistFromFS();
-    bool makeMediaFilesReady();
-    void processStates();
+    bool requestPlaylistAndMedia();
+    bool loadPlaylistFromFS();
+    bool makeMediaFilesReady();    
 };
 
 #endif // PLAYERCONTROLLER_H
