@@ -137,30 +137,45 @@ QByteArray Playlist::addQmlStates(QByteArray &qml)
         if (!known_media.contains(mediaResource["type"].toString()))
             continue;
 
-        const QString propertyChange("PropertyChanges {target: id%target%\n opacity: %op% }\n");
-        const QString timerProperty("PropertyChanges {target: timer \n interval: %toNextTick% }");
+        const QString propertyChangeTemplate("PropertyChanges {target: id%target%\n opacity: %op% }\n");
+        const QString timerPropertyTempalte("PropertyChanges {target: timer \n interval: %toNextTick% }\n");
+        const QString startVideoTemplate("StateChangeScript{ script: id%videoId%.start(); }\n");
+        const QString stopVideoTemplate("StateChangeScript{ script: id%videoId%.stop(); }\n");
+
 
         QString state("State {\n");
 
-            QString actualTargetChange(propertyChange);
+            QString actualTargetChange(propertyChangeTemplate);
             QString targetId = getTargetId(mediaResource);
 
             actualTargetChange.replace("%target%",targetId);
             actualTargetChange.replace("%op%","1");
             state.append(actualTargetChange);
 
+            if (mediaResource["type"].toString() == "Video"){
+                QString startVideo(startVideoTemplate);
+                startVideo.replace(QString("%videoId%"),targetId);
+                state.append(startVideo);
+            }
+
             int previewsMediaResourceIndex = findPreviousResource(resourcesArray,levelIndex);
             if (previewsMediaResourceIndex != levelIndex ){
                 QJsonObject previewsMediaResource = resourcesArray[previewsMediaResourceIndex].toObject();
                 QString targetId = getTargetId(previewsMediaResource);
-                QString previewsTargetChange(propertyChange);
+                QString previewsTargetChange(propertyChangeTemplate);
 
                 previewsTargetChange.replace("%target%",targetId);
                 previewsTargetChange.replace("%op%","0");
                 state.append(previewsTargetChange);
+
+                if (previewsMediaResource["type"].toString() == "Video"){
+                    QString stopVideo(stopVideoTemplate);
+                    stopVideo.replace(QString("%videoId%"),targetId);
+                    state.append(stopVideo);
+                }
             }
 
-            QString timerChange(timerProperty);
+            QString timerChange(timerPropertyTempalte);
             int duration = mediaResource["duration"].toInt();
             timerChange.replace("%toNextTick%",QString("%1").arg(duration)+"000");
             state.append(timerChange);
