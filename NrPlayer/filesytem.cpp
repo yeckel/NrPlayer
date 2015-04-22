@@ -23,17 +23,17 @@ void setupDataStore()
 }
 
 
-Playlist *loadSavedPlaylist(const QString playlistId)
+QSharedPointer<Playlist> loadSavedPlaylist(const QString playlistId)
 {
     QString dataPath = getDataPath();
 
     QFile playlist_file(dataPath+"/"+playlistId+".json");
     if (!playlist_file.open(QIODevice::ReadOnly)) {
         qDebug() << "File Open error";
-        return NULL;
+        return QSharedPointer<Playlist>(NULL);
     }
     QByteArray playlistData(playlist_file.readAll());
-    return new Playlist(playlistData);
+    return QSharedPointer<Playlist>(new Playlist(playlistData));
 
 }
 bool saveMediaFile(const QByteArray &data,const QString filename) {

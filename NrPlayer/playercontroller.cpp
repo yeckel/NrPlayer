@@ -69,7 +69,7 @@ void PlayerController::changeContollerState(PlayerController::ControllerStatus n
         break;
     case PLAYING:
     {
-        QSharedPointer<Playlist> newPlaylist(netClient.downloadPlaylist(playerId));
+        auto newPlaylist = netClient.downloadPlaylist(playerId);
         if (playlist.data()->isDifferent(newPlaylist.data())){
             emit (stateUpdated(WITHOUT_PLAYLIST));
         }else
@@ -82,7 +82,7 @@ void PlayerController::changeContollerState(PlayerController::ControllerStatus n
 }
 
 bool PlayerController::requestPlaylistAndMedia() {
-    playlist = QSharedPointer<Playlist>(netClient.downloadPlaylist(settings.value("Main/playerId","").toString()));
+    playlist = netClient.downloadPlaylist(settings.value("Main/playerId","").toString());
     if (playlist.data()->playlistIsValid()) {
         settings.setValue("Main/playlistId",QString(playlist.data()->getPlaylistId()));
         savePlaylist(playlist);
@@ -105,7 +105,7 @@ bool PlayerController::authenticate() {
 
 bool PlayerController::loadPlaylistFromFS() {
     QString currentPlaylistId = settings.value("Main/playlistId").toString();
-    playlist = QSharedPointer<Playlist>(loadSavedPlaylist(currentPlaylistId));
+    playlist = loadSavedPlaylist(currentPlaylistId);
     if (!playlist.isNull() && playlist.data()->playlistIsValid()){
         if (makeMediaFilesReady())
             return true;
