@@ -16,6 +16,7 @@ public:
     explicit PlayerController(QObject *parent = 0);
     ~PlayerController();
 
+    void getUpdates();
 signals:
     void stateUpdated(ControllerStatus status);
 public slots:
@@ -36,7 +37,7 @@ private:
     bool authenticate();
 
 
-    bool requestPlaylistAndMedia();
+    void requestPlaylistAndMedia();
     bool loadPlaylistFromFS();
     bool makeMediaFilesReady();    
 };

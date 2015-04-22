@@ -38,6 +38,21 @@ void PlayerController::timerUpdate()
     changeContollerState(controllerState);
 }
 
+void PlayerController::getUpdates()
+{
+    {
+        try{
+            auto newPlaylist = netClient.downloadPlaylist(playerId);
+            if (playlist.data()->isDifferent(newPlaylist.data())){
+                emit (stateUpdated(WITHOUT_PLAYLIST));
+            }else
+                updateTimer.start();
+        }catch(AuthExeption &e){
+            emit (stateUpdated(NOT_AUTHENTICATED));
+        }
+    }
+}
+
 void PlayerController::changeContollerState(PlayerController::ControllerStatus newStatus)
 {
     qDebug() << "Old state:" << controllerState << " new state:" << newStatus;
@@ -52,10 +67,7 @@ void PlayerController::changeContollerState(PlayerController::ControllerStatus n
         break;
     case WITHOUT_PLAYLIST:
         player.showSyncMessage();
-        if (requestPlaylistAndMedia())
-            emit(stateUpdated(READY_TO_PLAY));
-        else
-            updateTimer.start();
+        requestPlaylistAndMedia();
         break;
     case INIT_FROM_FS:
         if (loadPlaylistFromFS())
@@ -68,28 +80,29 @@ void PlayerController::changeContollerState(PlayerController::ControllerStatus n
              emit(stateUpdated(PLAYING));
         break;
     case PLAYING:
-    {
-        auto newPlaylist = netClient.downloadPlaylist(playerId);
-        if (playlist.data()->isDifferent(newPlaylist.data())){
-            emit (stateUpdated(WITHOUT_PLAYLIST));
-        }else
-            updateTimer.start();
-    }
+        getUpdates();
         break;
     default:
         break;
     }
 }
 
-bool PlayerController::requestPlaylistAndMedia() {
-    playlist = netClient.downloadPlaylist(settings.value("Main/playerId","").toString());
+void PlayerController::requestPlaylistAndMedia() {
+    try{
+        playlist = netClient.downloadPlaylist(settings.value("Main/playerId","").toString());
+    }catch(AuthExeption &e){
+        emit (stateUpdated(NOT_AUTHENTICATED));
+        return;
+    }
     if (playlist.data()->playlistIsValid()) {
         settings.setValue("Main/playlistId",QString(playlist.data()->getPlaylistId()));
         savePlaylist(playlist);
-        if (makeMediaFilesReady())
-            return true;
+        if (makeMediaFilesReady()){
+            emit(stateUpdated(READY_TO_PLAY));
+            return;
+        }
     }
-    return false;
+    updateTimer.start();
 }
 
 bool PlayerController::authenticate() {    

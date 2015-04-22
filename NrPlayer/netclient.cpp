@@ -68,6 +68,8 @@ QSharedPointer<Playlist> NetClient::downloadPlaylist(const QString playerId)
     };
 
     QByteArray responseData = requestServer(jsonPostData,"getState");
+    if (responseData == "204")
+        throw(AuthExeption());
 
     return QSharedPointer<Playlist>(new Playlist(responseData));
 

@@ -1,6 +1,7 @@
 #ifndef NETCLIENT_H
 #define NETCLIENT_H
 
+#include <QException>
 #include <QObject>
 #include <QDebug>
 #include <QFile>
@@ -13,6 +14,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QEventLoop>
+
 
 #include "auth.h"
 #include "playlist.h"
@@ -37,6 +39,14 @@ private:
     QString serverUrl;
     QSettings settings;
     QByteArray requestServer(const QJsonObject jsonPostData, const QString resource);
+};
+
+class AuthExeption: public QException
+{
+  virtual const char* what() const throw()
+  {
+    return "Not authenticated";
+  }
 };
 
 #endif // NETCLIENT_H
