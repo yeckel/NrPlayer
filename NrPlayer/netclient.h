@@ -32,7 +32,7 @@ signals:
 
 public slots:
     QString authenticate(const QString pairingCode);
-    Playlist *downloadPlaylist(const QString playerId);
+    QSharedPointer<Playlist> downloadPlaylist(const QString playerId);
 private:
     QString serverUrl;
     QSettings settings;

@@ -55,7 +55,7 @@ QString NetClient::authenticate(const QString pairingCode)
     return json["playerId"].toString();
 }
 
-Playlist* NetClient::downloadPlaylist(const QString playerId)
+QSharedPointer<Playlist> NetClient::downloadPlaylist(const QString playerId)
 {
     //qDebug() << Q_FUNC_INFO;
     QByteArray jsonData = "{\"media\":[],\"playlists\":[],\"resources\":[]}";
@@ -69,7 +69,7 @@ Playlist* NetClient::downloadPlaylist(const QString playerId)
 
     QByteArray responseData = requestServer(jsonPostData,"getState");
 
-    return new Playlist(responseData);
+    return QSharedPointer<Playlist>(new Playlist(responseData));
 
 }
 

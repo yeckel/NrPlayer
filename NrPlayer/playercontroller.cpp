@@ -69,7 +69,7 @@ void PlayerController::changeContollerState(PlayerController::ControllerStatus n
         break;
     case PLAYING:
     {
-        QScopedPointer<Playlist> newPlaylist(netClient.downloadPlaylist(playerId));
+        QSharedPointer<Playlist> newPlaylist(netClient.downloadPlaylist(playerId));
         if (playlist.data()->isDifferent(newPlaylist.data())){
             emit (stateUpdated(WITHOUT_PLAYLIST));
         }else
