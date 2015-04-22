@@ -33,7 +33,7 @@ public:
     QByteArray toQML() const;
 
     QList<QString> listMedia(const QList<QString> mediaTypes, const QString attribute = "id") const;
-    bool isDifferent(const Playlist *b) const;
+    bool isDifferent(const QSharedPointer<Playlist> b) const;
 signals:
 
 public slots:

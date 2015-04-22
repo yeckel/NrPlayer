@@ -235,7 +235,7 @@ QList<QString> Playlist::listMedia(const QList<QString> mediaTypes, const QStrin
     return files;
 }
 
-bool Playlist::isDifferent(const Playlist *b) const
+bool Playlist::isDifferent(const QSharedPointer<Playlist> b) const
 {
     if (this->version != b->version)
         return true;

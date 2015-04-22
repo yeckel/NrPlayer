@@ -30,13 +30,13 @@ QByteArray NetClient::requestServer(const QJsonObject jsonPostData,const QString
 
     eventLoop.exec();
 
-    if (reply.data()->error() == QNetworkReply::NoError) {
-        responseData = reply.data()->readAll();
+    if (reply->error() == QNetworkReply::NoError) {
+        responseData = reply->readAll();
         return responseData;
     }
     else {
-        responseData = QByteArray::number(reply.data()->error());
-        qDebug() << "Failure" <<reply.data()->errorString() << "data:" << responseData;
+        responseData = QByteArray::number(reply->error());
+        qDebug() << "Failure" <<reply->errorString() << "data:" << responseData;
     }
 
     return responseData;

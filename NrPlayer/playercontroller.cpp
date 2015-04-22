@@ -43,7 +43,7 @@ void PlayerController::getUpdates()
     {
         try{
             auto newPlaylist = netClient.downloadPlaylist(playerId);
-            if (playlist.data()->isDifferent(newPlaylist.data())){
+            if (playlist->isDifferent(newPlaylist)){
                 emit (stateUpdated(WITHOUT_PLAYLIST));
             }else
                 updateTimer.start();
@@ -76,7 +76,7 @@ void PlayerController::changeContollerState(PlayerController::ControllerStatus n
             emit(stateUpdated(WITHOUT_PLAYLIST));
         break;
     case READY_TO_PLAY:
-        if (!playlist.isNull() && player.play(playlist.data()))
+        if (!playlist.isNull() && player.play(playlist))
              emit(stateUpdated(PLAYING));
         break;
     case PLAYING:
@@ -94,8 +94,8 @@ void PlayerController::requestPlaylistAndMedia() {
         emit (stateUpdated(NOT_AUTHENTICATED));
         return;
     }
-    if (playlist.data()->playlistIsValid()) {
-        settings.setValue("Main/playlistId",QString(playlist.data()->getPlaylistId()));
+    if (playlist->playlistIsValid()) {
+        settings.setValue("Main/playlistId",QString(playlist->getPlaylistId()));
         savePlaylist(playlist);
         if (makeMediaFilesReady()){
             emit(stateUpdated(READY_TO_PLAY));
@@ -119,7 +119,7 @@ bool PlayerController::authenticate() {
 bool PlayerController::loadPlaylistFromFS() {
     QString currentPlaylistId = settings.value("Main/playlistId").toString();
     playlist = loadSavedPlaylist(currentPlaylistId);
-    if (!playlist.isNull() && playlist.data()->playlistIsValid()){
+    if (!playlist.isNull() && playlist->playlistIsValid()){
         if (makeMediaFilesReady())
             return true;
     }
@@ -128,7 +128,7 @@ bool PlayerController::loadPlaylistFromFS() {
 
 bool PlayerController::makeMediaFilesReady() {
     //qDebug() << Q_FUNC_INFO;
-    QList<QString> fileList = playlist.data()->listMediaFiles();
+    QList<QString> fileList = playlist->listMediaFiles();
     QList<QString> missingFiles = missingMediaFiles(fileList);
     if ( netClient.downloadFiles(missingFiles,settings.value("Main/playerId").toString()) ) {
         return true;

@@ -24,7 +24,7 @@ void VisualPlayer::showSyncMessage()
 
 }
 
-bool VisualPlayer::play(const Playlist *playlist)
+bool VisualPlayer::play(const QSharedPointer<Playlist> playlist)
 {
     //TODO check if qml returned by toQML is valid qml
     QByteArray qml = playlist->toQML();
